@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>nail_yar_karina — Запись на маникюр</title>
+  <script> src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #18181b;
+      --muted: #71717a;
+      --border: #e4e4e7;
+      --accent: #27272a;
+      --accent-soft: #f4f4f5;
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px 16px 96px;
+      line-height: 1.45;
+    }
+    .container { max-width: 480px; margin: 0 auto; }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #27272a; color: #fff; display: flex;
+      align-items: center; justify-content: center; font-weight: 700; font-size: 18px;
+    }
+    .brand-title { font-weight: 700; font-size: 16px; }
+    .brand-sub { font-size: 12px; color: var(--muted); }
+    .admin-btn {
+      background: var(--card); border: 1px solid var(--border);
+      padding: 7px 12px; border-radius: 99px; font-size: 12px; font-weight: 600;
+      color: var(--text); cursor: pointer;
+    }
+    .cat-box {
+      background: linear-gradient(145deg, #ffffff, #e5e7eb);
+      border-radius: var(--radius); padding: 16px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: var(--shadow); margin-bottom: 16px;
+      border: 1px solid #fff;
+    }
+    .cat-pic {
+      width: 74px; height: 74px; border-radius: 18px;
+      background: #d4d4d8; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; font-size: 38px;
+      overflow: hidden; border: 2px solid #fff;
+    }
+    .cat-pic img { width: 100%; height: 100%; object-fit: cover; }
+    .cat-bubble {
+      background: #fff; border-radius: 16px; padding: 10px 14px;
+      font-size: 13.5px; color: var(--text); position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04); flex: 1;
+    }
+    .cat-name { font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px;
+    }
+    h2 { margin: 0 0 12px; font-size: 18px; font-weight: 700; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .btn {
+      width: 100%; padding: 15px; border-radius: 16px; border: none;
+      background: var(--accent); color: #fff; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: transform 0.1s; display: flex;
+      align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-outline {
+      background: var(--accent-soft); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .option-card {
+      border: 1.5px solid var(--border); border-radius: 16px;
+      padding: 14px; margin-bottom: 10px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: all 0.15s; background: #fff;
+    }
+    .option-card.selected {
+      border-color: var(--accent); background: #f4f4f5;
+    }
+    .opt-title { font-weight: 600; font-size: 15px; }
+    .opt-desc { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .opt-price { font-weight: 700; font-size: 14px; white-space: nowrap; margin-left: 10px; }
+    .badge {
+      display: inline-block; background: #e4e4e7; color: #27272a;
+      font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 99px;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .slot-btn {
+      padding: 12px; border-radius: 14px; border: 1.5px solid var(--border);
+      background: #fff; font-weight: 600; font-size: 14px; cursor: pointer;
+      text-align: center;
+    }
+    .slot-btn.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .check-row {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px; background: var(--accent-soft); border-radius: 14px;
+      margin-bottom: 12px; cursor: pointer;
+    }
+    .check-row input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); }
+    textarea, input[type="text"], input[type="date"] {
+      width: 100%; padding: 12px 14px; border-radius: 14px;
+      border: 1.5px solid var(--border); font-family: inherit; font-size: 14px;
+      background: #fff; color: var(--text); outline: none;
+    }
+    textarea:focus, input:focus { border-color: var(--accent); }
+    .summary-row {
+      display: flex; justify-content: space-between; padding: 8px 0;
+      border-bottom: 1px solid var(--border); font-size: 14px;
+    }
+    .summary-row:last-child { border-bottom: none; font-weight: 700; font-size: 16px; }
+    .nav-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border); padding: 10px 16px;
+      display: flex; gap: 10px; max-width: 480px; margin: 0 auto;
+    }
+    .hidden { display: none !important; }
+    .pill-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 12px; }
+    .pill {
+      padding: 8px 14px; border-radius: 99px; border: 1px solid var(--border);
+      background: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;
+    }
+    .pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .upload-box {
+      border: 1.5px dashed #a1a1aa; border-radius: 16px; padding: 16px;
+      text-align: center; cursor: pointer; background: #fafafa; margin-bottom: 10px;
+    }
+    .preview-img { max-width: 100%; max-height: 180px; border-radius: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="brand">
+      <div class="avatar">NK</div>
+      <div>
+        <div class="brand-title">nail_yar_karina</div>
+        <div class="brand-sub">Ярославль • точный адрес пришлю лично</div>
+      </div>
+    </div>
+    <button class="admin-btn" onclick="openAdmin()">Карина 🔐</button>
+  </div>
+
+  <!-- ЖИВОЙ КОТИК-ПОМОЩНИК -->
+  <div class="cat-box">
+    <div class="cat-pic" id="catPic">🐱</div>
+    <div class="cat-bubble">
+      <div class="cat-name" id="catMood">Сфинкс • Помощник Карины</div>
+      <div id="catText">Мур! Привет, красотка 🤍 Я помогу тебе записаться к Карине без лишних хлопот. Жми «Записаться», и погнали!</div>
+    </div>
+  </div>
+
+  <!-- ЭКРАН 0: ГЛАВНАЯ -->
+  <div id="step-home">
+    <div class="card">
+      <h2>Запись на маникюр ✨</h2>
+      <p class="muted" style="margin-top:0">
+        Уютная студия в Ярославле. Стерильный инструмент, бережное отношение и идеальные формы. Предоплата не нужна — оплата только после процедуры.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+        <span class="badge">Без предоплаты</span>
+        <span class="badge">Снятие перед работой — 0 ₽</span>
+        <span class="badge">S – XXL и Когти</span>
+      </div>
+      <button class="btn" onclick="goStep('rules')">Записаться на ноготочки +</button>
+    </div>
+
+    <div class="card">
+      <h2>Мои записи 📋</h2>
+      <div id="myBookingsList" class="muted">Загружаю твои записи...</div>
+    </div>
+  </div>
+
+  <!-- ЭКРАН 1: ПРАВИЛА -->
+  <div id="step-rules" class="hidden">
+    <div class="card">
+      <h2>Перед записью 🤍</h2>
+      <label class="check-row">
+        <input type="checkbox" id="ruleCheck1" onchange="checkRules()" />
+        <span>Если ты опаздываешь более чем на <b>5 минут</b>, обязательно отпишись Карине в личные сообщения, чтобы мы всё успели!</span>
+      </label>
+      <label class="check-row">
+        <input type="checkbox" id="ruleCheck2" onchange="checkRules()" />
+        <span>Точный адрес кабинета в Ярославле Карина пришлёт тебе лично после подтверждения записи.</span>
+      </label>
+      <button class="btn" id="btnRulesNext" disabled onclick="goStep('service')">Всё понятно, идём дальше →</button>
+    </div>
+  </div>
+
+  <!-- ЭКРАН 2: ВЫБОР УСЛУГИ -->
+  <div id="step-service" class="hidden">
+    <div class="card">
+      <h2>Что будем делать? 💅</h2>
+      <div id="serviceOptions"></div>
+    </div>
+  </div>
+
+  <!-- ЭКРАН 2.5: ПОМОЩНИК "ПОКА НЕ ЗНАЮ" -->
+  <div id="step-helper" class="hidden">
+    <div class="card">
+      <h2>Давай определимся вместе 💡</h2>
+      <div class="option-card" onclick="selectServiceById('own')">
+        <div>
+          <div class="opt-title">Хочу укрепить свою длину</div>
+          <div class="opt-desc">Свои ногти устраивают, нужно красивое покрытие и укрепление</div>
+        </div>
+        <div class="opt-price">1 500 ₽</div>
+      </div>
+      <div class="option-card" onclick="selectServiceById('ext')">
+        <div>
+          <div class="opt-title">Хочу длиннее, чем сейчас</div>
+          <div class="opt-desc">Наращивание нужной длины (от S до XXL или когти)</div>
+        </div>
+        <div class="opt-price">от 1 700 ₽</div>
+      </div>
+      <div class="option-card" onclick="selectServiceById('corr')">
+        <div>
+          <div class="opt-title">Уже хожу с наращиванием от Карины</div>
+          <div class="opt-desc">Нужно обновить форму и покрытие (коррекция)</div>
+        </div>
+        
+        <div class="opt-price">от 1 700 ₽</div>
+      </div>
+      <div class="option-card" onclick="selectServiceById('reext')">
+        <div>
+          <div class="opt-title">Наращивание от другого мастера</div>
+          <div class="opt-desc">Снимем старый материал и сделаем новое перенаращивание</div>
+        </div>
+        <div class="opt-price">от 1 700 ₽</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="step-length" class="hidden">
+    <div class="card">
+      <h2>Выбери желаемую длину 📏</h2>
+      <div id="lengthOptions"></div>
+    </div>
+  </div>
+
+  <div id="step-coating" class="hidden">
+    <div class="card">
+      <h2>Сейчас есть покрытие на ногтях? ✨</h2>
+      <div class="option-card" onclick="selectCoating('Без покрытия')">
+        <div>
+          <div class="opt-title">Нет, ногти чистые</div>
+          <div class="opt-desc">Снятие не потребуется</div>
+        </div>
+        <div class="opt-price">0 ₽</div>
+      </div>
+      <div class="option-card" onclick="selectCoating('Покрытие от Карины')">
+        <div>
+          <div class="opt-title">Да, покрытие Карины</div>
+          <div class="opt-desc">Бережно снимем перед новой работой</div>
+        </div>
+        <div class="opt-price">0 ₽</div>
+      </div>
+      <div class="option-card" onclick="selectCoating('Покрытие от другого мастера')">
+        <div>
+          <div class="opt-title">Да, от другого мастера</div>
+          <div class="opt-desc">Снятие чужого покрытия входит в стоимость</div>
+        </div>
+        <div class="opt-price">0 ₽</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="step-design" class="hidden">
+    <div class="card">
+      <h2>Какой дизайн хочется? 🎨</h2>
+      <p class="muted" style="margin-top:0">Можешь выбрать из списка или загрузить фото / описать словами — я сам подскажу сложность и цену!</p>
+
+      <div class="upload-box" onclick="document.getElementById('refFile').click()">
+        <div>📸 <b>Прикрепить фото желаемого дизайна</b></div>
+        <div class="muted">Котик посмотрит и оценит сложность</div>
+        <input type="file" id="refFile" accept="image/*" class="hidden" onchange="handleRefPhoto(event)" />
+        <img id="refPreview" class="preview-img hidden" />
+      </div>
+
+      <textarea id="designWords" rows="2" placeholder="Или опиши словами: например, френч с изюминкой, пару страз, сердечки..." oninput="analyzeDesignText()"></textarea>
+      <div id="aiSuggestion" class="hidden" style="margin-top:10px; padding:12px; background:#f4f4f5; border-radius:14px; font-size:13px;"></div>
+
+      <div style="margin-top:14px;" id="designOptions"></div>
+      <button class="btn" style="margin-top:10px;" onclick="goStep('summary')">Продолжить →</button>
+    </div>
+  </div>
+
+  <div id="step-summary" class="hidden">
+    <div class="card">
+      <h2>Вот что мы выбрали 🤍</h2>
+      <div id="summaryDetails"></div>
+    </div>
+
+    <div class="card">
+      <h2>Выбери удобное окошко 🗓</h2>
+      <div id="datesTabs" class="pill-tabs"></div>
+      <div id="slotsGrid" class="grid-2"></div>
+
+      <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
+        <div class="muted" style="margin-bottom:8px;">Не нашла подходящий день? Запишись в лист ожидания:</div>
+        <button class="btn btn-outline" onclick="goStep('waitlist')">Встать в лист ожидания ⏳</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Твои контакты для связи 📱</h2>
+      <input type="text" id="clientNameInput" placeholder="Как тебя зовут?" style="margin-bottom:10px;" />
+      <button class="btn" id="btnConfirmBooking" disabled onclick="submitBooking()">Подтвердить запись ✨</button>
+    </div>
+  </div>
+
+  <div id="step-waitlist" class="hidden">
+    <div class="card">
+      <h2>Лист ожидания ⏳</h2>
+      <p class="muted">Напиши, в какие дни или часы тебе удобно прийти — если освободится окошко, Карина сразу напишет тебе!</p>
+      <input type="text" id="waitName" placeholder="Твоё имя" style="margin-bottom:10px;" />
+      <input type="text" id="waitDate" placeholder="Желаемая дата или дни недели" style="margin-bottom:12px;" />
+      <button class="btn" onclick="submitWaitlist()">Записаться в лист ожидания</button>
+    </div>
+  </div>
+
+  <div id="step-done" class="hidden">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:48px; margin-bottom:8px;">🤍</div>
+      <h2>Заявка отправлена!</h2>
+      <p class="muted">Карина уже получила твою запись. Как только она подтвердит её, она пришлёт тебе точный адрес в личные сообщения.</p>
+      <button class="btn" onclick="goStep('home')">На главный экран</button>
+    </div>
+  </div>
+
+  <div id="step-admin" class="hidden">
+    <div class="card">
+      <h2>Админка Карины 👑</h2>
+      <div class="pill-tabs">
+        <button class="pill active" onclick="switchAdminTab('bookings', this)">Записи</button>
+        <button class="pill" onclick="switchAdminTab('slots', this)">Окошки</button>
+        <button class="pill" onclick="switchAdminTab('wait', this)">Лист ожидания</button>
+      </div>
+
+      <div id="admin-bookings"></div>
+
+      <div id="admin-slots" class="hidden">
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <input type="date" id="newSlotDate" />
+          <input type="text" id="newSlotTime" placeholder="12:00" style="width:110px;" />
+        </div>
+        <button class="btn" style="margin-bottom:14px;" onclick="addSlot()">+ Добавить окошко</button>
+        <div id="adminSlotsList"></div>
+      </div>
+
+      <div id="admin-wait" class="hidden"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-bar hidden" id="bottomNav">
+  <button class="btn btn-outline" onclick="goBack()">← Назад</button>
+  <button class="btn btn-outline" onclick="goStep('home')">В начало</button>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://ozosbdlincgqxxtnrlqy.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_4LM8EFjqPt_T_RI2InAS2w_jZgpHHX-';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.expand(); tg.ready(); }
+
+  const tgUser = tg?.initDataUnsafe?.user || { id: 0, first_name: 'Гостья', username: '' };
+
+  const SERVICES = [
+    { id: 'own', name: 'Маникюр на свои ногти', desc: 'Комби-маникюр, укрепление и покрытие', price: 1500, mins: 90, needLength: false },
+    { id: 'ext', name: 'Наращивание', desc: 'Моделирование длины и формы с покрытием', price: 1700, mins: 100, needLength: true },
+    { id: 'reext', name: 'Перенаращивание', desc: 'Снятие старого наращивания + новое', price: 1700, mins: 100, needLength: true },
+    { id: 'corr', name: 'Коррекция после наращивания', desc: 'Если делала у другого мастера — выбери перенаращивание', price: 1700, mins: 100, needLength: true },
+    { id: 'remove', name: 'Только снять покрытие', desc: 'Бережное снятие материала без покрытия', price: 600, mins: 35, needLength: false },
+    { id: 'unsure', name: 'Пока не знаю', desc: 'Помогу подобрать подходящую услугу за 10 секунд', price: 0, mins: 0, needLength: false }
+  ];
+
+  const LENGTHS = [
+    { id: 'S', name: 'Длина S', desc: 'Аккуратная короткая длина', price: 1700, mins: 100 },
+    { id: 'M', name: 'Длина M', desc: 'Универсальная средняя длина', price: 1800, mins: 120 },
+    { id: 'L', name: 'Длина L', desc: 'Эффектная удлинённая форма', price: 1900, mins: 130 },
+    { id: 'XL', name: 'Длина XL', desc: 'Длинные выразительные ногти', price: 2100, mins: 150 },
+    { id: 'XXL', name: 'Длина XXL', desc: 'Экстремальная длина', price: 2500, mins: 180 },
+    { id: 'CLAWS', name: 'Форма «Когти»', desc: 'Дерзкая изогнутая форма когтей', price: 2800, mins: 180 }
+  ];
+
+  const DESIGNS = [
+    { id: 'simple', name: 'Простой дизайн', desc: 'Однотонные блёстки, горошек, простые линии, минимализм', price: 0 },
+    { id: 'medium', name: 'Средний дизайн', desc: 'Несложные рисунки или 1–2 фигурки без сложной композиции', price: 200 },
+    { id: 'french', name: 'Френч', desc: 'Классический, цветной или френч с изюминкой на все ногти', price: 300 },
+    { id: 'hard', name: 'Сложный дизайн', desc: 'Композиции из объёмного декора, сложная ручная роспись', price: 300 },
+    { id: 'very_hard', name: 'Очень сложный дизайн', desc: 'Плотная выкладка страз, крупная объёмная лепка на многих ногтях', price: 450 }
+  ];
+
+  const CAT_LINES = {
+    home: { emoji: '🐱', mood: 'Сфинкс • Ждёт тебя', text: 'Мур! Привет, красотка 🤍 Я Каринин пушистый (ну почти) помощник. Помогу выбрать ноготочки и занять лучшее окошко!' },
+    rules: { emoji: '🧐', mood: 'Сфинкс • Читает правила', text: 'Сначала быстрая формальность! Поставь галочки, что мы на одной волне — особенно про опоздания больше 5 минут.' },
+    service: { emoji: '💅', mood: 'Сфинкс • Подбирает услугу', text: 'Рассказывай, что будем творить сегодня? Если сомневаешься — жми «Пока не знаю», я подскажу!' },
+    helper: { emoji: '💡', mood: 'Сфинкс • Режим подружки', text: 'Не переживай, сейчас разберёмся! Выбери вариант, который больше всего похож на твои ногти сейчас.' },
+    length: { emoji: '📏', mood: 'Сфинкс • Меряет длину', text: 'Ооо, обожаю длинные коготки! Какую длину сделаем? Сразу покажу точную цену и время.' },
+    coating: { emoji: '✨', mood: 'Сфинкс • Проверяет базу', text: 'Подскажи, есть ли сейчас старое покрытие? Кстати, любое снятие перед процедурой у Карины бесплатное (0 ₽)!' },
+    design: { emoji: '🎨', mood: 'Сфинкс • Художник', text: 'Самое интересное! Скинь фотку из Pinterest или опиши идею словами — я прикину сложность и стоимость.' },
+    summary: { emoji: '🗓', mood: 'Сфинкс • Открывает ежедневник', text: 'Смотри, какая красота получилась! Осталось выбрать свободный денёк и время.' },
+    waitlist: { emoji: '⏳', mood: 'Сфинкс • Записывает в блокнот', text: 'Если нужного окошка пока нет — не беда! Оставь пожелание, и мы маякнём, как только освободится место.' },
+    done: { emoji: '😻', mood: 'Сфинкс • Счастлив!', text: 'Ура-ура! Твоя заявка уже летит к Карине. Скоро она подтвердит запись и пришлёт точный адрес 🤍' },
+      admin: { emoji: '👑', mood: 'Сфинкс • Режим босса', text: 'Привет, Карина! Здесь твоё расписание, новые заявки и лист ожидания.' }
+  };
+
+  let state = {
+    step: 'home',
+    history: [],
+    service: null,
+    length: null,
+    coating: 'Без покрытия',
+    design: DESIGNS[0],
+    designComment: '',
+    slot: null,
+    allSlots: []
+  };
+
+  function updateCat(stepKey, customText) {
+    const info = CAT_LINES[stepKey] || CAT_LINES.home;
+    document.getElementById('catPic').innerText = info.emoji;
+    document.getElementById('catMood').innerText = info.mood;
+    document.getElementById('catText').innerText = customText || info.text;
+  }
+
+  function goStep(next, pushHistory = true) {
+    if (pushHistory && state.step !== next) state.history.push(state.step);
+    document.querySelectorAll('[id^="step-"]').forEach(el => el.classList.add('hidden'));
+    document.getElementById('step-' + next).classList.remove('hidden');
+    state.step = next;
+    updateCat(next);
+    document.getElementById('bottomNav').classList.toggle('hidden', next === 'home');
+
+    if (next === 'home') loadMyBookings();
+    if (next === 'summary') renderSummaryAndSlots();
+    if (next === 'admin') loadAdminData();
+    window.scrollTo(0, 0);
+  }
+
+  function goBack() {
+    const prev = state.history.pop() || 'home';
+    goStep(prev, false);
+  }
+
+  function checkRules() {
+    const c1 = document.getElementById('ruleCheck1').checked;
+    const c2 = document.getElementById('ruleCheck2').checked;
+    document.getElementById('btnRulesNext').disabled = !(c1 && c2);
+  }
+
+  function renderServices() {
+    const box = document.getElementById('serviceOptions');
+    box.innerHTML = SERVICES.map(s => `
+      <div class="option-card" onclick="selectServiceById('${s.id}')">
+        <div>
+          <div class="opt-title">${s.name}</div>
+          <div class="opt-desc">${s.desc}</div>
+        </div>
+        <div class="opt-price">${s.price ? (s.needLength ? 'от ' + s.price + ' ₽' : s.price + ' ₽') : '→'}</div>
+      </div>
+    `).join('');
+  }
+
+  function selectServiceById(id) {
+    if (id === 'unsure') { goStep('helper'); return; }
+    state.service = SERVICES.find(s => s.id === id);
+    state.length = null;
+    if (state.service.needLength) {
+      renderLengths();
+      goStep('length');
+    } else if (state.service.id === 'remove') {
+      state.coating = 'Только снятие';
+      state.design = { id: 'none', name: 'Без дизайна', price: 0 };
+      goStep('summary');
+    } else {
+      goStep('coating');
+    }
+  }
+
+  function renderLengths() {
+    const box = document.getElementById('lengthOptions');
+    box.innerHTML = LENGTHS.map(l => `
+      <div class="option-card" onclick="selectLength('${l.id}')">
+        <div>
+          <div class="opt-title">${l.name}</div>
+          <div class="opt-desc">${l.desc} • ~${formatMins(l.mins)}</div>
+        </div>
+        <div class="opt-price">${l.price} ₽</div>
+      </div>
+    `).join('');
+  }
+
+  function selectLength(id) {
+    state.length = LENGTHS.find(l => l.id === id);
+    goStep('coating');
+  }
+
+  function selectCoating(val) {
+    state.coating = val;
+    renderDesigns();
+    goStep('design');
+  }
+
+  function renderDesigns() {
+    const box = document.getElementById('designOptions');
+    box.innerHTML = DESIGNS.map(d => `
+      <div class="option-card ${state.design?.id === d.id ? 'selected' : ''}" onclick="selectDesign('${d.id}')">
+        <div>
+          <div class="opt-title">${d.name}</div>
+          <div class="opt-desc">${d.desc}</div>
+        </div>
+        <div class="opt-price">+${d.price} ₽</div>
+      </div>
+    `).join('');
+  }
+
+  function selectDesign(id) {
+    state.design = DESIGNS.find(d => d.id === id);
+    renderDesigns();
+    updateCat('design', `Мур! Выбрали «${state.design.name}» (+${state.design.price} ₽). Отличный вкус!`);
+  }
+
+  function analyzeDesignText() {
+    const txt = document.getElementById('designWords').value.toLowerCase();
+    state.designComment = document.getElementById('designWords').value;
+    if (txt.length < 3) return;
+
+    let detected = DESIGNS[0];
+    let reason = 'Похоже на аккуратный базовый вариант (0 ₽).';
+
+    if (txt.includes('френч') || txt.includes('изюминк')) {
+      detected = DESIGNS[2];
+      reason = 'Вижу слово про френч! Это категория «Френч» (+300 ₽).';
+    } else if (txt.includes('страз') || txt.includes('лепк') || txt.includes('все ногти') || txt.includes('3d')) {
+      detected = DESIGNS[4];
+      reason = 'Звучит масштабно! Оцениваю как «Очень сложный дизайн» (+450 ₽).';
+    } else if (txt.includes('роспис') || txt.includes('сложн') || txt.includes('объем') || txt.includes('композиц')) {
+      detected = DESIGNS[3];
+      reason = 'Красивая идея! Подойдёт категория «Сложный дизайн» (+300 ₽).';
+    } else if (txt.includes('рисун') || txt.includes('сердеч') || txt.includes('фигур') || txt.includes('наклей')) {
+      detected = DESIGNS[1];
+      reason = 'Милый акцент! Это «Средний дизайн» (+200 ₽).';
+    }
+
+    selectDesign(detected.id);
+    const sug = document.getElementById('aiSuggestion');
+    sug.classList.remove('hidden');
+    sug.innerHTML = `🐱 <b>Подсказка котика:</b> ${reason} Я уже отметил этот вариант ниже!`;
+  }
+
+  function handleRefPhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = document.getElementById('refPreview');
+      img.src = ev.target.result;
+      img.classList.remove('hidden');
+      selectDesign('hard');
+      const sug = document.getElementById('aiSuggestion');
+      sug.classList.remove('hidden');
+      sug.innerHTML = `🐱 <b>Котик изучил фото:</b> Красота какая! Предварительно ставлю <b>«Сложный дизайн» (+300 ₽)</b>, а на месте Карина уточнит детали.`;
+      updateCat('design', 'Ого, какой референс! Поставил «Сложный дизайн» (+300 ₽) — если что, Карина скорректирует при встрече 🤍');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function getTotals() {
+    const basePrice = state.length ? state.length.price : (state.service?.price || 0);
+    const baseMins = state.length ? state.length.mins : (state.service?.mins || 0);
+    const designPrice = state.design?.price || 0;
+    return { price: basePrice + designPrice, duration: formatMins(baseMins) };
+  }
+
+  function formatMins(m) {
+    const h = Math.floor(m / 60);
+    const min = m % 60;
+    if (!h) return `${min} мин`;
+    return min ? `${h} ч ${min} мин` : `${h} ч`;
+  }
+
+  async function renderSummaryAndSlots() {
+    const totals = getTotals();
+    document.getElementById('clientNameInput').value = tgUser.first_name !== 'Гостья' ? tgUser.first_name : '';
+    document.getElementById('summaryDetails').innerHTML = `
+      <div class="summary-row"><span>Услуга</span><b>${state.service.name}${state.length ? ' (' + state.length.name + ')' : ''}</b></div>
+      <div class="summary-row"><span>Снятие покрытия</span><span>${state.coating} (0 ₽)</span></div>
+      <div class="summary-row"><span>Дизайн</span><span>${state.design.name} (+${state.design.price} ₽)</span></div>
+      <div class="summary-row"><span>Длительность</span><span>~${totals.duration}</span></div>
+      <div class="summary-row"><span>Предоплата</span><span>0 ₽ (без предоплаты)</span></div>
+      <div class="summary-row"><span>Итого к оплате</span><span>${totals.price} ₽</span></div>
+    `;
+
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await db.from('slots').select('*').eq('is_booked', false).gte('slot_date', today).order('slot_date').order('slot_time');
+    state.allSlots = data || [];
+
+    const dates = [...new Set(state.allSlots.map(s => s.slot_date))];
+    const tabs = document.getElementById('datesTabs');
+    const grid = document.getElementById('slotsGrid');
+
+    if (!dates.length) {
+      tabs.innerHTML = '';
+      grid.innerHTML = '<div class="muted" style="grid-column:1/-1">Свободных окошек пока нет — запишись в лист ожидания ниже 🤍</div>';
+      return;
+    }
+
+    tabs.innerHTML = dates.map((d, i) => `
+      <button class="pill ${i === 0 ? 'active' : ''}" onclick="selectDateTab('${d}', this)">${formatDateRu(d)}</button>
+    `).join('');
+    renderSlotsForDate(dates[0]);
+  }
+
+  function selectDateTab(dateStr, btn) {
+    document.querySelectorAll('#datesTabs .pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    renderSlotsForDate(dateStr);
+  }
+
+  function renderSlotsForDate(dateStr) {
+    const daySlots = state.allSlots.filter(s => s.slot_date === dateStr);
+    document.getElementById('slotsGrid').innerHTML = daySlots.map(s => `
+      <button class="slot-btn ${state.slot?.id === s.id ? 'selected' : ''}" onclick="pickSlot('${s.id}')">${s.slot_time}</button>
+    `).join('');
+  }
+
+  function pickSlot(id) {
+    state.slot = state.allSlots.find(s => s.id === id);
+    renderSlotsForDate(state.slot.slot_date);
+    document.getElementById('btnConfirmBooking').disabled = false;
+  }
+
+  async function submitBooking() {
+    const name = document.getElementById('clientNameInput').value.trim() || 'Красотка';
+    if (!state.slot) return;
+    const totals = getTotals();
+
+    document.getElementById('btnConfirmBooking').disabled = true;
+    await db.from('slots').update({ is_booked: true }).eq('id', state.slot.id);
+    await db.from('bookings').insert({
+      tg_user_id: tgUser.id,
+      tg_username: tgUser.username || '',
+      client_name: name,
+      service_name: state.service.name,
+      length_option: state.length ? state.length.name : '',
+      design_option: state.design.name,
+      design_comment: state.designComment,
+      total_price: totals.price,
+      total_duration: totals.duration,
+      slot_id: state.slot.id,
+      booking_date: state.slot.slot_date,
+      booking_time: state.slot.slot_time,
+      status: 'pending'
+    });
+    goStep('done');
+  }
+
+  async function submitWaitlist() {
+    const name = document.getElementById('waitName').value.trim() || tgUser.first_name;
+      const d = document.getElementById('waitDate').value.trim();
+    if (!d) return alert('Напиши, пожалуйста, желаемую дату или дни!');
+    await db.from('waitlist').insert({
+      tg_user_id: tgUser.id,
+      tg_username: tgUser.username || '',
+      client_name: name,
+      desired_date: d,
+      service_name: state.service?.name || 'Маникюр'
+    });
+    goStep('done');
+  }
+
+  async function loadMyBookings() {
+    const box = document.getElementById('myBookingsList');
+    if (!tgUser.id) {
+      box.innerText = 'Открой бота внутри Telegram, чтобы видеть свои активные записи.';
+      return;
+    }
+    const { data } = await db.from('bookings').select('*').eq('tg_user_id', tgUser.id).order('booking_date', { ascending: false });
+    if (!data || !data.length) {
+      box.innerText = 'У тебя пока нет активных записей. Самое время это исправить!';
+      return;
+    }
+    box.innerHTML = data.map(b => `
+      <div style="padding:10px 0; border-bottom:1px solid var(--border);">
+        <b>${formatDateRu(b.booking_date)} в ${b.booking_time}</b> • <span class="badge">${b.status === 'confirmed' ? 'Подтверждено ✅' : 'Ждёт подтверждения ⏳'}</span>
+        <div class="muted">${b.service_name} ${b.length_option} • ${b.total_price} ₽</div>
+      </div>
+    `).join('');
+  }
+
+  function openAdmin() {
+    const saved = localStorage.getItem('karina_admin_ok');
+    if (!saved) {
+      const pass = prompt('Введи пин-код мастера (по умолчанию 1511):');
+      if (pass !== '1511') return alert('Неверный код');
+      localStorage.setItem('karina_admin_ok', '1');
+    }
+    goStep('admin');
+  }
+
+  function switchAdminTab(tab, btn) {
+    document.querySelectorAll('#step-admin .pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    ['bookings', 'slots', 'wait'].forEach(t => document.getElementById('admin-' + t).classList.add('hidden'));
+    document.getElementById('admin-' + tab).classList.remove('hidden');
+  }
+
+  async function loadAdminData() {
+    const { data: bks } = await db.from('bookings').select('*').order('booking_date', { ascending: false });
+    document.getElementById('admin-bookings').innerHTML = (bks && bks.length) ? bks.map(b => `
+      <div style="padding:12px; border:1px solid var(--border); border-radius:14px; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between;">
+          <b>${formatDateRu(b.booking_date)} • ${b.booking_time}</b>
+          <span class="badge">${b.status === 'confirmed' ? 'Подтверждена' : 'Новая'}</span>
+        </div>
+        <div style="margin:6px 0; font-size:14px;">
+          Клиент: <b>${b.client_name}</b> ${b.tg_username ? '(@' + b.tg_username + ')' : ''}<br>
+          Услуга: ${b.service_name} ${b.length_option}<br>
+          Дизайн: ${b.design_option} ${b.design_comment ? '(' + b.design_comment + ')' : ''}<br>
+          Сумма: <b>${b.total_price} ₽</b> (~${b.total_duration})
+        </div>
+        <div style="display:flex; gap:8px;">
+          ${b.status !== 'confirmed' ? `<button class="btn" style="padding:8px; font-size:13px;" onclick="confirmBooking('${b.id}')">Подтвердить ✅</button>` : ''}
+          <button class="btn btn-outline" style="padding:8px; font-size:13px;" onclick="deleteBooking('${b.id}', '${b.slot_id}')">Отменить</button>
+        </div>
+      </div>
+    `).join('') : '<div class="muted">Записей пока нет</div>';
+
+    const { data: sls } = await db.from('slots').select('*').order('slot_date').order('slot_time');
+    document.getElementById('adminSlotsList').innerHTML = (sls && sls.length) ? sls.map(s => `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+        <span><b>${formatDateRu(s.slot_date)}</b> в ${s.slot_time} (${s.is_booked ? 'Занято' : 'Свободно'})</span>
+        <button class="admin-btn" onclick="deleteSlot('${s.id}')">Удалить</button>
+      </div>
+    `).join('') : '<div class="muted">Окошек пока не добавлено</div>';
+
+    const { data: wts } = await db.from('waitlist').select('*').order('created_at', { ascending: false });
+    document.getElementById('admin-wait').innerHTML = (wts && wts.length) ? wts.map(w => `
+      <div style="padding:10px; border:1px solid var(--border); border-radius:12px; margin-bottom:8px;">
+        <b>${w.client_name}</b> ${w.tg_username ? '(@' + w.tg_username + ')' : ''}<br>
+        <span class="muted">Хочет: ${w.desired_date} • ${w.service_name}</span>
+      </div>
+    `).join('') : '<div class="muted">Лист ожидания пуст</div>';
+  }
+
+  async function addSlot() {
+    const d = document.getElementById('newSlotDate').value;
+    const t = document.getElementById('newSlotTime').value.trim();
+    if (!d || !t) return alert('Выбери дату и напиши время (например 14:00)');
+    await db.from('slots').insert({ slot_date: d, slot_time: t });
+    document.getElementById('newSlotTime').value = '';
+    loadAdminData();
+  }
+
+  async function deleteSlot(id) {
+    await db.from('slots').delete().eq('id', id);
+    loadAdminData();
+  }
+
+  async function confirmBooking(id) {
+    await db.from('bookings').update({ status: 'confirmed' }).eq('id', id);
+    loadAdminData();
+  }
+
+  async function deleteBooking(id, slotId) {
+    await db.from('bookings').delete().eq('id', id);
+    if (slotId && slotId !== 'null') await db.from('slots').update({ is_booked: false }).eq('id', slotId);
+    loadAdminData();
+  }
+
+  function formatDateRu(iso) {
+    const [y, m, d] = iso.split('-');
+    const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+    return `${parseInt(d)} ${months[parseInt(m) - 1]}`;
+  }
+
+  renderServices();
+  loadMyBookings();
+</script>
+</body>
+</html>
