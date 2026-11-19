@@ -47,6 +47,10 @@
       filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6)); animation: floatCat 3.4s ease-in-out infinite;
       font-size: 72px; text-align: center; line-height: 120px;
     }
+    .novel-cat-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .side-cat-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .length-photo { width: 76px; height: 76px; object-fit: contain; border-radius: 12px; flex-shrink: 0; }
+
     .cat-tag { font-size: 11px; font-weight: 700; color: #d4d4d8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
     .speaking { animation: talkBounce 0.45s ease-in-out infinite alternate !important; }
     @keyframes floatCat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
@@ -139,7 +143,7 @@
   <!-- ПРИВЕТСТВИЕ -->
   <div id="step-home">
     <div class="novel-hero">
-      <div class="novel-cat-img">🐱</div>
+      <div class="novel-cat-img"><img src="./cat_home.png" alt="Буби-кот" onerror="this.style.display='none'"></div>
     </div>
     <div class="glass-card" onclick="repeatAudio()" style="cursor:pointer;">
       <div class="cat-tag">Буби-кот • Помощник Карины 🔊</div>
@@ -165,7 +169,7 @@
         <div class="cat-tag">Буби-кот • Читает правила 🔊</div>
         <div id="speech-rules">Сначала быстрая формальность... Поставь галочки, что мы на одной волне, ладно?</div>
       </div>
-      <div class="side-cat-img">🧐</div>
+      <div class="side-cat-img"><img src="./cat_rules.png" alt="Буби-кот читает правила" onerror="this.style.display='none'"></div>
     </div>
     <div class="glass-card">
       <h2>Перед записью 🤍</h2>
@@ -192,7 +196,7 @@
         <div class="cat-tag">Буби-кот • Подбирает услугу 🔊</div>
         <div id="speech-service">Рассказывай... что будем творить сегодня? Если сомневаешься, жми «Пока не знаю», я подскажу!</div>
       </div>
-      <div class="side-cat-img">💅</div>
+      <div class="side-cat-img"><img src="./cat_service.png" alt="Буби-кот подбирает услугу" onerror="this.style.display='none'"></div>
     </div>
     <div class="glass-card"><h2>Что будем делать? 💅</h2><div id="serviceOptions"></div></div>
   </div>
@@ -224,7 +228,7 @@
         <div class="cat-tag">Буби-кот • Палитра 🔊</div>
         <div id="speech-coating">Я прихватил палитру, чтобы мы ничего не упустили... Расскажи, есть ли сейчас покрытие на ноготочках?</div>
       </div>
-      <div class="side-cat-img">🎨</div>
+      <div class="side-cat-img"><img src="./cat_coating.png" alt="Буби-кот выбирает покрытие" onerror="this.style.display='none'"></div>
     </div>
     <div class="glass-card">
       <h2>Сейчас есть покрытие на ногтях? ✨</h2>
@@ -240,7 +244,7 @@
         <div class="cat-tag">Буби-кот • Художник 🔊</div>
         <div id="speech-design">Самое интересное... Скинь фотку из Пинтерест или опиши идею словами, я прикину сложность!</div>
       </div>
-      <div class="side-cat-img">🖌</div>
+      <div class="side-cat-img"><img src="./cat_design.png" alt="Буби-кот помогает с дизайном" onerror="this.style.display='none'"></div>
     </div>
     <div class="glass-card">
       <h2>Какой дизайн хочется? 🎨</h2>
@@ -263,7 +267,7 @@
         <div class="cat-tag">Буби-кот • Открывает ежедневник 🔊</div>
         <div id="speech-summary">Мур... какая красота получилась! Осталось выбрать удобный денёк и время.</div>
       </div>
-      <div class="side-cat-img">🗓</div>
+      <div class="side-cat-img"><img src="./cat_summary.png" alt="Буби-кот показывает запись" onerror="this.style.display='none'"></div>
     </div>
     <div class="glass-card"><h2>Вот что мы выбрали 🤍</h2><div id="summaryDetails"></div></div>
     <div class="glass-card">
@@ -294,7 +298,7 @@
 
   <div id="step-done" class="hidden">
     <div class="novel-hero">
-      <div class="novel-cat-img">😻</div>
+      <div class="novel-cat-img"><img src="./cat_done.png" alt="Буби-кот поздравляет" onerror="this.style.display='none'"></div>
     </div>
     <div class="glass-card" style="text-align:center;" onclick="repeatAudio()">
       <div class="cat-tag">Буби-кот • Счастлив! 🔊</div>
@@ -346,7 +350,7 @@
   const SUPABASE_KEY = 'sb_publishable_4LM8EFjqPt_T_RI2InAS2w_jZgpHHX-';
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const BOT_TOKEN = '9092772941:AAEXE0Vu8dXXIiFxBfR4UVVYCTNQ0jyuyYc';
+  const BOT_TOKEN = '';
   const KARINA_CHAT_ID = '6117878501';
   const ADMIN_SECRET = '11.04';
 
@@ -501,6 +505,7 @@
   function renderLengths() {
     document.getElementById('lengthOptions').innerHTML = LENGTHS.map(l => `
       <div class="option-card" onclick="selectLength('${l.id}')">
+        <img class="length-photo" src="./${({S:'nail_s.jpg',M:'nail_m.jpg',L:'nail_l.jpg',XL:'nail_xl.jpg',XXL:'nail_xxl.jpg',CLAWS:'nail_claws.jpg'})[l.id]}" alt="${l.name}" loading="lazy" onerror="this.style.display='none'">
         <div><div class="opt-title">${l.name}</div><div class="opt-desc">${l.desc} • ~${formatMins(l.mins)}</div></div>
         <div class="opt-price">${l.price} ₽</div>
       </div>`).join('');
@@ -676,6 +681,7 @@
   }
 
   async function sendTelegramNotice(text) {
+    if (!BOT_TOKEN) { console.warn('Telegram уведомления отключены: настройте серверный endpoint.'); return; }
     try {
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
