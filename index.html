@@ -47,7 +47,7 @@
       filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6)); animation: floatCat 3.4s ease-in-out infinite;
       font-size: 72px; text-align: center; line-height: 120px;
     }
-    .novel-cat-img img, .side-cat-img img { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: lighten; -webkit-mask-image: radial-gradient(ellipse 86% 88% at 50% 48%, #000 72%, transparent 100%); filter: brightness(0.86) contrast(1.25); mask-image: radial-gradient(ellipse 86% 88% at 50% 48%, #000 72%, transparent 100%); }
+    .novel-cat-img img, .side-cat-img img { width: 100%; height: 100%; object-fit: contain; display: block;}
     
     .length-photo { width: 76px; height: 76px; object-fit: contain; border-radius: 12px; flex-shrink: 0; }
 
@@ -985,6 +985,32 @@
   renderServices();
   loadMyBookings();
   playStepAudio('home');
+    function removeDarkBg(img) {
+    if (!img || !img.naturalWidth || img.dataset.bgRemoved) return;
+    img.dataset.bgRemoved = '1';
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const id = ctx.getImageData(0, 0, c.width, c.height);
+    const d = id.data;
+    const bgR = d[0], bgG = d[1], bgB = d[2];
+      
+    for (let i = 0; i < d.length; i += 4) {
+      const dist = Math.abs(d[i] - bgR) + Math.abs(d[i + 1] - bgG) + Math.abs(d[i + 2] - bgB);
+      if (dist < 42) d[i + 3] = 0;
+      else if (dist < 75) d[i + 3] = Math.round(((dist - 42) / 33) * 255);
+    }
+    ctx.putImageData(id, 0, 0);
+    img.src = c.toDataURL('image/png');
+  }
+
+  document.querySelectorAll('.novel-cat-img img, .side-cat-img img').forEach(img => {
+    if (img.complete) removeDarkBg(img);
+    else img.onload = () => removeDarkBg(img);
+  });
+  
 </script>
 </body>
 </html>
