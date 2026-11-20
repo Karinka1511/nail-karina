@@ -47,8 +47,8 @@
       filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6)); animation: floatCat 3.4s ease-in-out infinite;
       font-size: 72px; text-align: center; line-height: 120px;
     }
-    .novel-cat-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
-    .side-cat-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .novel-cat-img img, .side-cat-img img { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: lighten; -webkit-mask-image: radial-gradient(ellipse 86% 88% at 50% 48%, #000 72%, transparent 100%); mask-image: radial-gradient(ellipse 86% 88% at 50% 48%, #000 72%, transparent 100%); }
+    
     .length-photo { width: 76px; height: 76px; object-fit: contain; border-radius: 12px; flex-shrink: 0; }
 
     .cat-tag { font-size: 11px; font-weight: 700; color: #d4d4d8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
@@ -202,6 +202,8 @@
   </div>
 
   <div id="step-helper" class="hidden">
+   <div class="side-stage"><div class="side-bubble" onclick="repeatAudio()"><div class="cat-tag">Буби-кот • Помогает определиться 🔊</div><div id="speech-helper">Мур-р... Не переживай, сейчас во всём разберёмся! Ответь всего на один вопросик — и я сразу подскажу, какая процедура тебе подойдёт.</div></div><div class="side-cat-img"><img src="./cat_service.png" alt="Буби-кот" onerror="this.style.display='none'"></div></div>
+    
     <div class="glass-card">
       <h2>Давай определимся вместе 💡</h2>
       <div class="option-card" onclick="selectServiceById('own')"><div><div class="opt-title">Хочу укрепить свою длину</div><div class="opt-desc">Свои ногти устраивают, нужно покрытие</div></div><div class="opt-price">1 500 ₽</div></div>
@@ -217,7 +219,7 @@
         <div class="cat-tag">Буби-кот • Меряет длину 🔊</div>
         <div id="speech-length">Ооо... обожаю длинные коготки! Выбирай длину, сразу покажу точную цену и время.</div>
       </div>
-      <div class="side-cat-img">📏</div>
+      <div class="side-cat-img"><img src="./cat_length.png" alt="Буби-кот" onerror="this.style.display='none'"></div>
     </div>
     <div class="glass-card"><h2>Выбери желаемую длину 📏</h2><div id="lengthOptions"></div></div>
   </div>
@@ -267,7 +269,7 @@
         <div class="cat-tag">Буби-кот • Открывает ежедневник 🔊</div>
         <div id="speech-summary">Мур... какая красота получилась! Осталось выбрать удобный денёк и время.</div>
       </div>
-      <div class="side-cat-img"><img src="./cat_summary.png" alt="Буби-кот показывает запись" onerror="this.style.display='none'"></div>
+      <div class="side-cat-img"><img src="./cat_design.png" alt="Буби-кот показывает запись" onerror="this.style.display='none'"></div>
     </div>
     <div class="glass-card"><h2>Вот что мы выбрали 🤍</h2><div id="summaryDetails"></div></div>
     <div class="glass-card">
@@ -364,7 +366,7 @@
     home: '1_home.mp3',
     rules: '2_rules.mp3',
     service: '3_service.mp3',
-    helper: '4_coating.mp3',
+    helper: '9_helper.mp3',
     coating: '4_coating.mp3',
     length: '5_length.mp3',
     design: '6_design.mp3',
@@ -418,14 +420,14 @@
     { id: 'CLAWS', name: 'Форма «Когти»', desc: 'Дерзкая изогнутая форма когтей', price: 2800, mins: 180 }
   ];
 
-  const DESIGNS = [
-    { id: 'simple', name: 'Простой дизайн', desc: 'Однотонные блёстки, горошек, простые линии, минимализм', price: 0 },
-    { id: 'medium', name: 'Средний дизайн', desc: 'Несложные рисунки или 1–2 фигурки без сложной композиции', price: 200 },
+    const DESIGNS = [
+    { id: 'simple', name: 'Простой', desc: 'Однотонное покрытие, блёстки, горошек, минимализм', price: 0 },
+    { id: 'medium', name: 'Средний', desc: 'Несложные рисунки или 1–2 фигурки без сложной композиции', price: 200 },
     { id: 'french', name: 'Френч', desc: 'Классический, цветной или френч с изюминкой на все ногти', price: 300 },
-    { id: 'hard', name: 'Сложный дизайн', desc: 'Композиции из объёмного декора, сложная ручная роспись', price: 300 },
-    { id: 'very_hard', name: 'Очень сложный дизайн', desc: 'Плотная выкладка страз, крупная объёмная лепка на многих ногтях', price: 450 }
+    { id: 'hard', name: 'Сложный', desc: 'Композиции из объёмного декора, сложная ручная роспись', price: 300 },
+    { id: 'very_hard', name: 'Очень сложный', desc: 'Плотная выкладка страз, крупная объёмная лепка на многих ногтях', price: 450 }
   ];
-
+  
   let state = {
     step: 'home', history: [], service: null, length: null,
     coating: 'Без покрытия', design: DESIGNS[0], designComment: '',
@@ -543,20 +545,60 @@
     sug.innerHTML = `🐱 <b>Подсказка Буби-кота:</b> ${reason}`;
   }
 
-  function handleRefPhoto(e) {
+    function handleRefPhoto(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => {
-      const img = document.getElementById('refPreview');
-      img.src = ev.target.result; img.classList.remove('hidden');
-      selectDesign('hard');
-      const sug = document.getElementById('aiSuggestion');
-      sug.classList.remove('hidden');
-      sug.innerHTML = `🐱 <b>Буби-кот изучил фото:</b> Красота! Ставлю <b>«Сложный дизайн» (+300 ₽)</b>, а на месте Карина уточнит детали.`;
+      const img = new Image();
+      img.onload = () => {
+        const preview = document.getElementById('refPreview');
+        preview.src = ev.target.result;
+        preview.classList.remove('hidden');
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const size = 96;
+        canvas.width = size;
+        canvas.height = size;
+        ctx.drawImage(img, 0, 0, size, size);
+
+        const data = ctx.getImageData(0, 0, size, size).data;
+        const colors = new Set();
+        let edges = 0, bright = 0;
+
+        for (let y = 1; y < size - 1; y++) {
+          for (let x = 1; x < size - 1; x++) {
+            const i = (y * size + x) * 4;
+   const r = data[i], g = data[i + 1], b = data[i + 2];
+            colors.add(`${r >> 5}-${g >> 5}-${b >> 5}`);
+            if (Math.max(r, g, b) - Math.min(r, g, b) > 85) bright++;
+            const diff = Math.abs(r - data[i + 4]) + Math.abs(g - data[i + 5]) + Math.abs(b - data[i + 6])
+                       + Math.abs(r - data[i + size * 4]) + Math.abs(g - data[i + size * 4 + 1]) + Math.abs(b - data[i + size * 4 + 2]);
+            if (diff > 110) edges++;
+          }
+        }
+
+        const total = (size - 2) * (size - 2);
+        const detail = edges / total;
+        let id = 'simple', label = 'Простой (0 ₽)';
+
+        if (detail < 0.06 && colors.size <= 26) { id = 'simple'; label = 'Простой (0 ₽)'; }
+        else if (detail < 0.12 && colors.size <= 38) { id = 'medium'; label = 'Средний (+200 ₽)'; }
+        else if (detail < 0.17 && bright / total < 0.22) { id = 'french'; label = 'Френч (+300 ₽)'; }
+        else if (detail < 0.24 && colors.size <= 58) { id = 'hard'; label = 'Сложный (+300 ₽)'; }
+        else { id = 'very_hard'; label = 'Очень сложный (+450 ₽)'; }
+
+        selectDesign(id);
+        const sug = document.getElementById('aiSuggestion');
+        sug.classList.remove('hidden');
+        sug.innerHTML = `🐱 <b>Буби-кот изучил фото:</b> Красота! Ставлю <b>«${label}»</b>, а на месте Карина уточнит детали.`;
+      };
+      img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
-  }
+    }
+  
 
   function getTotals() {
     const basePrice = state.length ? state.length.price : (state.service ? state.service.price : 0);
